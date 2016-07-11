@@ -30,4 +30,18 @@ class WebcrawlerTest extends JunitFunSuite {
         |""".stripMargin
     webcrawler.crawl("starting url") must be(expectedOutput)
   }
+
+  test("crawl through simple page with links and list them") {
+    when(httpClient.get("starting url")).thenReturn("content with links")
+    when(tagFinder.findTags("content with links", "a", "href")).thenReturn(Seq("link1", "link2"))
+    when(tagFinder.findTags("content with links", "img", "src")).thenReturn(Seq())
+
+    val expectedOutput =
+      """Visiting: starting url
+        |Found link: link1
+        |Found link: link2
+        |---
+        |""".stripMargin
+    webcrawler.crawl("starting url") must be(expectedOutput)
+  }
 }
