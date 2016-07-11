@@ -5,6 +5,7 @@ import org.mockito.Mockito._
 
 class WebcrawlerTest extends JunitFunSuite {
   private val httpContent = "httpContent"
+  private val httpContentFromLink1 = "httpContentFromLink1"
   private val startingUrlHost = "http://host"
   private val startingUrlPath = "/path"
   private val startingUrl = startingUrlHost + startingUrlPath
@@ -16,8 +17,11 @@ class WebcrawlerTest extends JunitFunSuite {
   override def beforeEach() {
     reset(httpClient, tagFinder)
     when(httpClient.get(startingUrl)).thenReturn(httpContent)
+    when(httpClient.get(startingUrlHost + "/link1")).thenReturn(httpContentFromLink1)
     when(tagFinder.findTags(httpContent, "a", "href")).thenReturn(Seq())
     when(tagFinder.findTags(httpContent, "img", "src")).thenReturn(Seq())
+    when(tagFinder.findTags(httpContentFromLink1, "a", "href")).thenReturn(Seq())
+    when(tagFinder.findTags(httpContentFromLink1, "img", "src")).thenReturn(Seq())
   }
 
   test("crawl through simple page with no content") {
@@ -39,9 +43,6 @@ class WebcrawlerTest extends JunitFunSuite {
 
   test("crawl through simple page with links, follow and list them") {
     when(tagFinder.findTags(httpContent, "a", "href")).thenReturn(Seq("link1"))
-    when(httpClient.get(startingUrlHost + "/link1")).thenReturn("content from link1")
-    when(tagFinder.findTags("content from link1", "a", "href")).thenReturn(Seq())
-    when(tagFinder.findTags("content from link1", "img", "src")).thenReturn(Seq())
 
     val expectedOutput =
       s"""Visiting: $startingUrl
@@ -55,9 +56,7 @@ class WebcrawlerTest extends JunitFunSuite {
 
   test("does not revisit already visited links") {
     when(tagFinder.findTags(httpContent, "a", "href")).thenReturn(Seq("link1"))
-    when(httpClient.get(startingUrlHost + "/link1")).thenReturn("content from link1")
-    when(tagFinder.findTags("content from link1", "a", "href")).thenReturn(Seq(startingUrlPath))
-    when(tagFinder.findTags("content from link1", "img", "src")).thenReturn(Seq())
+    when(tagFinder.findTags(httpContentFromLink1, "a", "href")).thenReturn(Seq(startingUrlPath))
 
     val expectedOutput =
       s"""Visiting: $startingUrl
