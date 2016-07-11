@@ -2,10 +2,10 @@ package gd.buildit.webcrawl.acceptance
 
 import gd.buildit.webcrawl.JunitFunSuite
 import gd.buildit.webcrawl.core.Webcrawler
-import gd.buildit.webcrawl.infrastructure.DefaultHttpClient
+import gd.buildit.webcrawl.infrastructure.{DefaultHttpClient, RegexTagFinder}
 
 class WebcrawlerAcceptanceTest extends JunitFunSuite {
-  private val webcrawler = new Webcrawler(new DefaultHttpClient())
+  private val webcrawler = new Webcrawler(new DefaultHttpClient(), new RegexTagFinder())
 
   test("crawl through page produces site map") {
     val expectedOutput =
@@ -20,6 +20,7 @@ class WebcrawlerAcceptanceTest extends JunitFunSuite {
         |Found link: /html/index.html
         |---
         |Visiting: file://html/page2.html
+        |Found image: /img/test.jpg
         |--- """.stripMargin
 
     webcrawler.crawl("file://html/index.html") must be(expectedOutput)
