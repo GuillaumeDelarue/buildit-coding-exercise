@@ -11,6 +11,7 @@
 * I've separated core domain logic and infrastructure (specific implementations with dependencies), following the "hexagonal architecture" implementation, aka ports and adapters
   For reference see: http://alistair.cockburn.us/Hexagonal+architecture
 * The main Unit-test (WebcrawlerTest.scala) uses Mockito to mock all the infrastructure dependencies
+* For now, only image resources are listed - it can be improved to add all kind of resources
 
 See WebcrawlerAcceptanceTest for usage
 
