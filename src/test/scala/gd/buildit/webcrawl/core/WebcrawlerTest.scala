@@ -69,7 +69,7 @@ class WebcrawlerTest extends JunitFunSuite {
     webcrawler.crawl(startingUrl) must be(expectedOutput)
   }
 
-  test("can visit absolute links from initial domain") {
+  test("can visit absolute links to initial domain") {
     when(tagFinder.findTags(httpContent, "a", "href")).thenReturn(Seq(s"$startingUrlHost/link1"))
 
     val expectedOutput =
@@ -82,7 +82,7 @@ class WebcrawlerTest extends JunitFunSuite {
     webcrawler.crawl(startingUrl) must be(expectedOutput)
   }
 
-  test("only visit links from initial domain") {
+  test("only visit links to initial domain and ignore external links") {
     when(tagFinder.findTags(httpContent, "a", "href")).thenReturn(Seq("http://www.google.co.uk/somepath", "link1"))
 
     val expectedOutput =
