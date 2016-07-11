@@ -3,17 +3,22 @@ package gd.buildit.webcrawl.core
 import scala.annotation.tailrec
 
 class Webcrawler(val httpClient: HttpClient, val tagFinder: TagFinder) {
-  var host = ""
+  private var host = ""
+  private var visitedPaths: Set[String] = Set.empty
 
   def crawl(startingUrl: String): String = {
     val (host, path) = readUrl(startingUrl)
     println(s"HOST = $host, PATH = $path")
     this.host = host
+    this.visitedPaths = Set.empty
     recursivelyVisitInternalLink(path)
   }
 
   private def recursivelyVisitInternalLink(path: String): String = {
     val pathWithSlash = if (path.startsWith("/")) path else s"/$path"
+    if (visitedPaths.contains(pathWithSlash)) return ""
+
+    visitedPaths = visitedPaths + pathWithSlash
     val content = httpClient.get(host + pathWithSlash)
     val links = tagFinder.findTags(content, "a", "href")
     val images = tagFinder.findTags(content, "img", "src")

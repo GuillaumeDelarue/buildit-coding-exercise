@@ -52,4 +52,21 @@ class WebcrawlerTest extends JunitFunSuite {
           |""".stripMargin
     webcrawler.crawl(startingUrl) must be(expectedOutput)
   }
+
+  test("does not revisit already visited links") {
+    when(tagFinder.findTags(httpContent, "a", "href")).thenReturn(Seq("link1"))
+    when(httpClient.get(startingUrlHost + "/link1")).thenReturn("content from link1")
+    when(tagFinder.findTags("content from link1", "a", "href")).thenReturn(Seq(startingUrlPath))
+    when(tagFinder.findTags("content from link1", "img", "src")).thenReturn(Seq())
+
+    val expectedOutput =
+      s"""Visiting: $startingUrl
+          |Found link: link1
+          |---
+          |Visiting: $startingUrlHost/link1
+          |Found link: $startingUrlPath
+          |---
+          |""".stripMargin
+    webcrawler.crawl(startingUrl) must be(expectedOutput)
+  }
 }
