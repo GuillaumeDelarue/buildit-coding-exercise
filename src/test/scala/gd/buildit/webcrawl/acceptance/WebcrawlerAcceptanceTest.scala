@@ -2,9 +2,10 @@ package gd.buildit.webcrawl.acceptance
 
 import gd.buildit.webcrawl.JunitFunSuite
 import gd.buildit.webcrawl.core.Webcrawler
+import gd.buildit.webcrawl.infrastructure.DefaultHttpClient
 
 class WebcrawlerAcceptanceTest extends JunitFunSuite {
-  private val webcrawler = new Webcrawler()
+  private val webcrawler = new Webcrawler(new DefaultHttpClient())
 
   test("crawl through page produces site map") {
     val expectedOutput =
