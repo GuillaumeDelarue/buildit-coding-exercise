@@ -20,19 +20,15 @@ class Webcrawler(val httpClient: HttpClient, val tagFinder: TagFinder) {
     val links = tagFinder.findTags(content, "a", "href")
     val images = tagFinder.findTags(content, "img", "src")
 
-    val stringBuilder = new StringBuilder()
-
-    stringBuilder.append(s"Visiting: $host$sanitisedPath" +
+    val thisLinkSummary = s"Visiting: $host$sanitisedPath" +
       images.map(image => s"\nFound image: ${image.trim}").mkString("") +
       links.map(link => s"\nFound link: ${link.trim}").mkString("") +
       "\n" +
-      "---\n")
+      "---\n"
 
     links
       .flatMap(sanitiseLinkAndIgnoreExternal)
-      .foreach(link => stringBuilder.append(recursivelyVisitInternalLink(link)))
-
-    stringBuilder.toString()
+      .foldLeft(thisLinkSummary)((string, link) => string + recursivelyVisitInternalLink(link))
   }
 
   private def readStartingUrl(urlAsString: String): (String, String) = {
