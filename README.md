@@ -15,6 +15,7 @@ See WebcrawlerAcceptanceTest for usage
 Problems/limitations to solve:
 * Output is currently fixed to string
 * Using regexp to parse HTML is NOT a good idea. But that works in simple case
+* Does not work for absolute URLs for now
 * Synchronous - not the best performance for links-heavy sites
 * Does not handle timeout (default Source get method never times out!)
 

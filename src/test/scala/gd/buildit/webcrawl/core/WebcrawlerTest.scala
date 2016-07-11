@@ -4,44 +4,52 @@ import gd.buildit.webcrawl.JunitFunSuite
 import org.mockito.Mockito._
 
 class WebcrawlerTest extends JunitFunSuite {
+  private val httpContent = "httpContent"
+  private val startingUrlHost = "http://host"
+  private val startingUrlPath = "/path"
+  private val startingUrl = startingUrlHost + startingUrlPath
+
   private val httpClient = mock[HttpClient]
   private val tagFinder = mock[TagFinder]
   private val webcrawler = new Webcrawler(httpClient, tagFinder)
 
-  test("crawl through simple page with no content") {
-    when(httpClient.get("starting url")).thenReturn("nothing to handle")
-    when(tagFinder.findTags("nothing to handle", "a", "href")).thenReturn(Seq())
-    when(tagFinder.findTags("nothing to handle", "img", "src")).thenReturn(Seq())
+  override def beforeEach() {
+    reset(httpClient, tagFinder)
+    when(httpClient.get(startingUrl)).thenReturn(httpContent)
+    when(tagFinder.findTags(httpContent, "a", "href")).thenReturn(Seq())
+    when(tagFinder.findTags(httpContent, "img", "src")).thenReturn(Seq())
+  }
 
-    val expectedOutput = "Visiting: starting url\n---\n"
-    webcrawler.crawl("starting url") must be(expectedOutput)
+  test("crawl through simple page with no content") {
+    val expectedOutput = s"Visiting: $startingUrl\n---\n"
+    webcrawler.crawl(startingUrl) must be(expectedOutput)
   }
 
   test("crawl through simple page with images and list them") {
-    when(httpClient.get("starting url")).thenReturn("content with images")
-    when(tagFinder.findTags("content with images", "a", "href")).thenReturn(Seq())
-    when(tagFinder.findTags("content with images", "img", "src")).thenReturn(Seq("image1", "image2"))
+    when(tagFinder.findTags(httpContent, "img", "src")).thenReturn(Seq("image1", "image2"))
 
     val expectedOutput =
-      """Visiting: starting url
-        |Found image: image1
-        |Found image: image2
-        |---
-        |""".stripMargin
-    webcrawler.crawl("starting url") must be(expectedOutput)
+      s"""Visiting: $startingUrl
+          |Found image: image1
+          |Found image: image2
+          |---
+          |""".stripMargin
+    webcrawler.crawl(startingUrl) must be(expectedOutput)
   }
 
-  test("crawl through simple page with links and list them") {
-    when(httpClient.get("starting url")).thenReturn("content with links")
-    when(tagFinder.findTags("content with links", "a", "href")).thenReturn(Seq("link1", "link2"))
-    when(tagFinder.findTags("content with links", "img", "src")).thenReturn(Seq())
+  test("crawl through simple page with links, follow and list them") {
+    when(tagFinder.findTags(httpContent, "a", "href")).thenReturn(Seq("link1"))
+    when(httpClient.get(startingUrlHost + "/link1")).thenReturn("content from link1")
+    when(tagFinder.findTags("content from link1", "a", "href")).thenReturn(Seq())
+    when(tagFinder.findTags("content from link1", "img", "src")).thenReturn(Seq())
 
     val expectedOutput =
-      """Visiting: starting url
-        |Found link: link1
-        |Found link: link2
-        |---
-        |""".stripMargin
-    webcrawler.crawl("starting url") must be(expectedOutput)
+      s"""Visiting: $startingUrl
+          |Found link: link1
+          |---
+          |Visiting: $startingUrlHost/link1
+          |---
+          |""".stripMargin
+    webcrawler.crawl(startingUrl) must be(expectedOutput)
   }
 }
