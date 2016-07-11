@@ -5,8 +5,10 @@
 * IntelliJ IDEA EAP 2016.2 preview used for IDE
 * Gradle used for dependency management
 
-* Using (partial) Acceptance-TDD: I wrote acceptance criteria first, which drove the code (first commit has the first acceptance criteria)
+* Using (partial) Acceptance-TDD: I wrote acceptance criteria first (WebcrawlerAcceptanceTest.scala), which drove the code (first commit has the first acceptance criteria)
 * Then used TDD to drive development
+
+See WebcrawlerAcceptanceTest for usage
 
 Problems/limitations to solve:
 * Output is currently fixed to string
